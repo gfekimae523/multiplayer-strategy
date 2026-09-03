@@ -2,9 +2,9 @@
     "name": "multiplayer-strategy", 
     "version": "0.1.0", 
     "description": "A prototype of a large-scale multiplayer strategy simulation game.", 
-    "main": "server/index.js",
+    "main": "server/server.js",
     "scripts": {
-        "start": "node server/index.js" 
+        "start": "node server/server.js" 
     }, 
     "dependencies": {
         "ws": "^8.21.3" 
