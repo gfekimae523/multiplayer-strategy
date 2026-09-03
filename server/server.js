@@ -79,7 +79,7 @@ wss.on('connection', (ws) => {
 });
 
 function mainloop() {
-    console.log("time: " + mainGame.time);
+    console.log('time: ' + mainGame.time);
 
     mainGame.update();
 
