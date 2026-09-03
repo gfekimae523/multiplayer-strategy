@@ -10,16 +10,16 @@ let gameState;
 
 
 ws.onmessage = (event) => {
-    gameState = event.data;
+    gameState = JSON.parse(event.data);
 };
 
 
 
 function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
 
     ctx.fillStyle = 'rgb(150, 255, 150)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
 
     let squads = gameState.squads;
     squads.forEach((squad) => {

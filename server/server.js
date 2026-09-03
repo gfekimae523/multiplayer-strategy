@@ -3,10 +3,20 @@
 class Game {
     time;
     squads;
+    spawnPos;
 
     constructor() {
         this.time = 0;
-        this.squads = [new Squad(0, 0)];
+        this.squads = [];
+        this.spawnPos = {x: 400, y: 300};
+    }
+
+    addSquad(id) {
+        this.squads.push(new Squad(id, this.spawnPos));
+    }
+
+    removeSquad(id) {
+
     }
 
     update() {
@@ -26,14 +36,18 @@ class Game {
 }
 
 class Squad {
+    id;
     pos;
     targetPos;
     units;
+    speed;
 
-    constructor(x, y) {
-        this.pos = {x: x, y: y};
-        this.targetPos = {x: x, y: y};
+    constructor(id, spawnPos) {
+        this.id = id;
+        this.pos = {x: spawnPos.x, y: spawnPos.y};
+        this.targetPos = {x: spawnPos.x, y: spawnPos.y};
         this.units = [new Unit()];
+        this.speed = 3;
     }
 
     update() {
@@ -53,6 +67,7 @@ class Unit {
 
 
 let mainGame;
+let connectionCount;
 
 
 const { WebSocketServer } = require('ws');
@@ -62,6 +77,9 @@ const wss = new WebSocketServer({ port: 8080 });
 
 wss.on('connection', (ws) => {
     console.log('プレイヤーが接続しました。接続人数' + wss.clients.size + '人');
+    mainGame.addSquad(connectionCount);
+    ws.id = connectionCount;
+    connectionCount++;
 
     ws.on('message', (message) => {
 
@@ -91,6 +109,8 @@ function mainloop() {
 
 function init() {
     mainGame = new Game();
+    connectionCount = 0;
+
     setInterval(mainloop, 1000);
 }
 
