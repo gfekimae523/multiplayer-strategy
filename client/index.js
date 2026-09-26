@@ -1,4 +1,8 @@
 
+const FACTION = {
+    PLAYER: "player",
+    ENEMY: "enemy"
+};
 
 const ws = new WebSocket('ws://localhost:8080');
 
@@ -15,22 +19,56 @@ ws.onmessage = (event) => {
 
 
 
+
+
 function draw() {
     ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
 
-    ctx.fillStyle = 'rgb(150, 255, 150)';
+    ctx.fillStyle = 'rgb(210, 255, 150)';
     ctx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
 
-    let squads = gameState.squads;
-    squads.forEach((squad) => {
-        ctx.fillStyle = 'rgb(0, 0, 200)';
-        ctx.fillRect(squad.pos.x - 5, squad.pos.y - 5, 10, 10);
+    if (!gameState) {
+        return;
+    }
+
+    gameState.squads.forEach((squad) => {
+        if (squad.id === gameState.playerId) {
+            ctx.fillStyle = 'rgb(0, 200, 0)';
+        } else if (squad.faction === FACTION.PLAYER) {
+            ctx.fillStyle = 'rgb(0, 0, 200)';
+        } else if (squad.faction === FACTION.ENEMY) {
+            ctx.fillStyle = 'rgb(200, 0, 0)';
+        }
+        ctx.fillRect(
+            squad.pos.x - 5,
+            squad.pos.y - 5,
+            10,
+            10
+        );
     });
 
 }
 
+function bindEvents() {
+    mainCanvas.addEventListener('click', (event) => {
+        const rect = mainCanvas.getBoundingClientRect();
+
+        const x = (event.clientX - rect.left) * mainCanvas.width / rect.width;
+        const y = (event.clientY - rect.top) * mainCanvas.height / rect.height;
+
+        ws.send(JSON.stringify({
+            type: 'move',
+            targetPos: {
+                x: x,
+                y: y
+            }
+        }));
+    });
+}
+
 function mainloop() {
     draw();
+    requestAnimationFrame(mainloop);
 }
 
 function init() {
@@ -42,7 +80,9 @@ function init() {
         squads: []
     };
 
-    setInterval(mainloop, 1000);
+    bindEvents();
+
+    requestAnimationFrame(mainloop);
 }
 
 document.addEventListener('DOMContentLoaded', init);
