@@ -437,46 +437,20 @@ let connectionCount;
 
 
 const http = require('http');
-const fs = require('fs');
-const path = require('path');
 const { WebSocketServer } = require('ws');
 
 const PORT = process.env.PORT || 8080;
 
 const server = http.createServer((req, res) => {
-    let filePath;
-
-    if (req.url === '/') {
-        filePath = path.join(__dirname, '..', 'client', 'index.html');
-    } else if (req.url === '/index.js') {
-        filePath = path.join(__dirname, '..', 'client', 'index.js');
-    } else {
-        res.writeHead(404);
-        res.end('Not Found');
-        return;
-    }
-
-    fs.readFile(filePath, (err, data) => {
-        if (err) {
-            res.writeHead(500);
-            res.end('Internal Server Error');
-            return;
-        }
-
-        const contentType =
-            req.url.endsWith('.js')
-                ? 'text/javascript'
-                : 'text/html';
-
-        res.writeHead(200, {
-            'Content-Type': contentType
-        });
-
-        res.end(data);
-    });
+    res.writeHead(200);
+    res.end('Game Server is running.');
 });
 
 const wss = new WebSocketServer({ server });
+
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server started on port ${PORT}`);
+});
 
 
 wss.on('connection', (ws) => {
