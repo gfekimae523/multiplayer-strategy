@@ -16,12 +16,13 @@ class Game {
     spawnPos;
 
     time;
-    lastSpawnTime;
-    lastTargetTime;
-    enemyCount;
+    enemySpawnTimer;
+    targetSearchTimer;
+    enemyIdCounter;
 
     squads;
-
+    attacks;
+    effects;
 
     constructor() {
         this.width = 800;
@@ -32,11 +33,13 @@ class Game {
         };
 
         this.time = 0;
-        this.lastSpawnTime = 0;
-        this.lastTargetTime = 0;
-        this.enemyCount = 0;
+        this.enemySpawnTimer = 0;
+        this.targetSearchTimer = 0;
+        this.enemyIdCounter = 0;
 
         this.squads = [];
+        this.attacks = [];
+        this.effects = [];
     }
 
     addSquad({ id, faction, spawnPos, unitList }) {
@@ -56,7 +59,7 @@ class Game {
 
     addPlayer({ id }) {
         const defaultUnitList = [
-            { type: UNIT.GOBLIN, num: 10 }
+            { type: UNIT.GOBLIN, count: 10 }
         ];
         this.addSquad({
             id: id,
@@ -73,11 +76,11 @@ class Game {
         };
 
         const unitList = [
-            { type: UNIT.GOBLIN, num: 3 }
+            { type: UNIT.GOBLIN, count: 4 }
         ];
 
         this.addSquad({
-            id: `enemy-${this.enemyCount}`,
+            id: `enemy-${this.enemyIdCounter}`,
             faction: FACTION.ENEMY,
             spawnPos: spawnPos,
             unitList: unitList
@@ -92,7 +95,7 @@ class Game {
     }
 
     spawnEnemy() {
-        if (this.time - this.lastSpawnTime < 5) {
+        if (this.enemySpawnTimer < 5) {
             return;
         }
         const enemyCount = this.squads.filter(squad => squad.faction === FACTION.ENEMY).length;
@@ -101,8 +104,8 @@ class Game {
         }
 
         this.addEnemy();
-        this.enemyCount++;
-        this.lastSpawnTime = this.time;
+        this.enemyIdCounter++;
+        this.enemySpawnTimer = 0;
 
     }
 
@@ -134,11 +137,9 @@ class Game {
     }
 
     updateEnemyTargets() {
-        if (this.time - this.lastTargetTime < 1) {
+        if (this.targetSearchTimer < 1) {
             return;
         }
-
-        this.lastTargetTime = this.time;
 
         const enemySquads = this.squads.filter(
             squad => squad.faction === FACTION.ENEMY
@@ -155,14 +156,85 @@ class Game {
 
             enemySquad.setTargetPos(targetSquad.pos);
         });
+
+        this.targetSearchTimer = 0;
+    }
+
+    getAttackableEnemySquads({squad}) {
+        return this.squads.filter((targetSquad) => {
+            if (targetSquad.faction === squad.faction) {
+                return false;
+            }
+
+            const dx = targetSquad.pos.x - squad.pos.x;
+            const dy = targetSquad.pos.y - squad.pos.y;
+
+            const distance = Math.sqrt(dx ** 2 + dy ** 2);
+
+            return (distance <= squad.attackRange);
+        });
+    }
+
+    getRandomElement(array) {
+        if (array.length === 0) {
+            return null;
+        }
+
+        const index = Math.floor(Math.random() * array.length);
+        return array[index];
+    }
+
+    updateAttacks({dt}) {
+        this.squads.forEach((squad) => {
+            squad.attackTimer += dt;
+
+            if (squad.attackTimer < squad.attackCooldownTime) {
+                return;
+            }
+
+            const targetSquads = this.getAttackableEnemySquads({
+                squad: squad
+            });
+
+            const targetSquad = this.getRandomElement(targetSquads);
+
+            if (!targetSquad) {
+                return;
+            }
+
+            this.attacks.push(
+                new Attack({
+                    attackerSquad: squad, 
+                    targetSquad: targetSquad
+                })
+            );
+
+            squad.attackTimer = 0;
+        });
     }
 
     update({ dt }) {
         this.time += dt;
+        this.enemySpawnTimer += dt;
+        this.targetSearchTimer += dt;
 
         this.squads.forEach((squad) => {
             squad.update({ dt: dt });
         });
+
+        this.updateAttacks({dt: dt});
+
+        this.attacks.forEach((attack) => {
+            const result = attack.update({dt: dt});
+
+            if (result?.effect) {
+                this.effects.push(result.effect);
+            }
+        });
+
+        this.attacks = this.attacks.filter(
+            attack => !attack.finished
+        );
 
         this.spawnEnemy();
         this.updateEnemyTargets();
@@ -171,7 +243,8 @@ class Game {
     getState() {
         return {
             time: this.time,
-            squads: this.squads
+            squads: this.squads, 
+            attacks: this.attacks
         };
     }
 }
@@ -181,7 +254,14 @@ class Squad {
     faction;
     pos;
     targetPos;
+
+    targetSquad;
+    attackTimer;
+    attackCooldownTime;
+    attackRange;
+
     units;
+
     speed;
 
     constructor({ id, faction, spawnPos, unitList }) {
@@ -189,9 +269,15 @@ class Squad {
         this.faction = faction;
         this.pos = { x: spawnPos.x, y: spawnPos.y };
         this.targetPos = { x: spawnPos.x, y: spawnPos.y };
+
+        this.targetSquad = null;
+        this.attackTimer = 0;
+        this.attackCooldownTime = 6;
+        this.attackRange = 100;
+
         this.units = [];
-        unitList.forEach(({ type, num }) => {
-            for (let i = 0; i < num; i++) {
+        unitList.forEach(({ type, count }) => {
+            for (let i = 0; i < count; i++) {
                 let unit;
                 switch (type) {
                     case UNIT.GOBLIN:
@@ -242,12 +328,14 @@ class Squad {
 
 
 class Unit {
+    maxHp;
     hp;
     attack;
     speed;
 
-    constructor({ hp, attack, speed }) {
-        this.hp = hp;
+    constructor({ maxHp, attack, speed }) {
+        this.maxHp = maxHp;
+        this.hp = maxHp;
         this.attack = attack;
         this.speed = speed;
     }
@@ -256,7 +344,7 @@ class Unit {
 class Goblin extends Unit {
     constructor() {
         super({
-            hp: 30,
+            maxHp: 30,
             attack: 3,
             speed: 20
         });
@@ -266,10 +354,77 @@ class Goblin extends Unit {
 class Horse extends Unit {
     constructor() {
         super({
-            hp: 50,
+            maxHp: 50,
             attack: 5,
             speed: 40
         });
+    }
+}
+
+class Attack {
+    attackerSquad;
+    targetSquad;
+    startPos;
+    targetPos;
+
+    time;
+    travelTime;
+    finished;
+
+    constructor({ attackerSquad, targetSquad}) {
+        this.attackerSquad = attackerSquad;
+        this.targetSquad = targetSquad;
+
+        this.startPos = {
+            x: attackerSquad.pos.x, 
+            y: attackerSquad.pos.y
+        };
+
+        this.targetPos = {
+            x: targetSquad.pos.x, 
+            y: targetSquad.pos.y
+        };
+        
+        this.time = 0;
+        this.travelTime = 2;
+        this.finished = false;
+    }
+
+    update({dt}) {
+        this.time += dt;
+
+        if (this.time >= this.travelTime) {
+            const effect = this.hit();
+
+            return {effect: effect};
+        }
+
+        return null;
+    }
+
+    hit() {
+        //回避判定
+        //ダメージ処理
+        //ExplosionEffect生成
+
+        const effect = new ExplosionEffect({
+            pos: this.targetPos
+        });
+
+        this.finished = true;
+
+        return effect;
+    }
+}
+
+class ExplosionEffect {
+    pos;
+
+    constructor({pos}) {
+        this.pos = {
+            x: pos.x, 
+            y: pos.y
+        };
     }
 }
 
@@ -277,13 +432,51 @@ class Horse extends Unit {
 
 let mainGame;
 let lastTime;
-let lastSendTime;
+let broadcastTimer;
 let connectionCount;
 
 
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
 const { WebSocketServer } = require('ws');
-const wss = new WebSocketServer({ port: 8080 });
 
+const PORT = process.env.PORT || 8080;
+
+const server = http.createServer((req, res) => {
+    let filePath;
+
+    if (req.url === '/') {
+        filePath = path.join(__dirname, '..', 'client', 'index.html');
+    } else if (req.url === '/index.js') {
+        filePath = path.join(__dirname, '..', 'client', 'index.js');
+    } else {
+        res.writeHead(404);
+        res.end('Not Found');
+        return;
+    }
+
+    fs.readFile(filePath, (err, data) => {
+        if (err) {
+            res.writeHead(500);
+            res.end('Internal Server Error');
+            return;
+        }
+
+        const contentType =
+            req.url.endsWith('.js')
+                ? 'text/javascript'
+                : 'text/html';
+
+        res.writeHead(200, {
+            'Content-Type': contentType
+        });
+
+        res.end(data);
+    });
+});
+
+const wss = new WebSocketServer({ server });
 
 
 wss.on('connection', (ws) => {
@@ -321,10 +514,14 @@ function mainloop() {
     const dt = (now - lastTime) / 1000;
     lastTime = now;
 
+    broadcastTimer += dt;
+
     mainGame.update({ dt: dt });
 
-    if (now - lastSendTime >= 200) {
-        lastSendTime = now;
+    
+
+    if (broadcastTimer >= 0.2) {
+        broadcastTimer = 0;
 
         const gameState = mainGame.getState();
         wss.clients.forEach((client) => {
@@ -341,7 +538,7 @@ function mainloop() {
 function init() {
     mainGame = new Game();
     lastTime = Date.now();
-    lastSendTime = lastTime;
+    broadcastTimer = 0;
     connectionCount = 0;
 
     setInterval(mainloop, 50);

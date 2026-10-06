@@ -4,7 +4,8 @@ const FACTION = {
     ENEMY: "enemy"
 };
 
-const ws = new WebSocket('ws://localhost:8080');
+const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+const ws = new WebSocket(`${protocol}//${location.host}`);
 
 let mainCanvas;
 let ctx;
@@ -47,6 +48,17 @@ function draw() {
         );
     });
 
+    gameState.attacks.forEach((attack) => {
+        const ratio = attack.time / attack.travelTime;
+
+        const x = attack.startPos.x + (attack.targetPos.x - attack.startPos.x) * ratio;
+        const y = attack.startPos.y + (attack.targetPos.y - attack.startPos.y) * ratio;
+
+        ctx.fillStyle = 'rgb(255, 255, 255)';
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+    });
 }
 
 function bindEvents() {
@@ -77,7 +89,8 @@ function init() {
 
     gameState = {
         time: null,
-        squads: []
+        squads: [], 
+        attacks: []
     };
 
     bindEvents();
