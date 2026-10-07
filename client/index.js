@@ -75,6 +75,7 @@ function bindEvents() {
 
 function mainloop() {
     draw();
+    console.log(gameState.squads)
     requestAnimationFrame(mainloop);
 }
 

@@ -96,7 +96,7 @@ class GameServer {
         this.webSocketServer.clients.forEach((client) => {
             if (client.readyState === 1) {
                 client.send(JSON.stringify({
-                    playerId: client.id,
+                    playerId: client.playerId,
                     ...gameState
                 }));
             }
