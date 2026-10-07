@@ -39,7 +39,7 @@ class Game {
     addSquad({ playerId, squadId, faction, spawnPos, unitList }) {
         this.squads.push(
             new Squad({
-                playerId: playerId, 
+                playerId: playerId,
                 squadId: squadId,
                 faction: faction,
                 spawnPos: spawnPos,
@@ -52,12 +52,12 @@ class Game {
         this.squads = this.squads.filter(squad => squad.squadId !== squadId);
     }
 
-    addPlayer({playerId}) {
+    addPlayer({ playerId }) {
         const defaultUnitList = [
             { type: UNIT.GOBLIN, count: 10 }
         ];
         this.addSquad({
-            playerId: playerId, 
+            playerId: playerId,
             squadId: this.squadCounter,
             faction: FACTION.PLAYER,
             spawnPos: this.spawnPos,
@@ -77,7 +77,7 @@ class Game {
         ];
 
         this.addSquad({
-            playerId: null, 
+            playerId: null,
             squadId: this.squadCounter,
             faction: FACTION.ENEMY,
             spawnPos: spawnPos,
@@ -86,8 +86,11 @@ class Game {
         this.squadCounter++;
     }
 
-    setTargetPos({ id, targetPos }) {
-        const squad = this.squads.find(squad => squad.id === id);
+    setTargetPos({ playerId, targetPos }) {
+        const squad = this.squads.find(
+            squad => squad.playerId === playerId
+        );
+
         if (!squad) return;
 
         squad.setTargetPos(targetPos);
@@ -158,7 +161,7 @@ class Game {
         this.targetSearchTimer = 0;
     }
 
-    getAttackableEnemySquads({squad}) {
+    getAttackableEnemySquads({ squad }) {
         return this.squads.filter((targetSquad) => {
             if (targetSquad.faction === squad.faction) {
                 return false;
@@ -182,7 +185,7 @@ class Game {
         return array[index];
     }
 
-    updateCombat({dt}) {
+    updateCombat({ dt }) {
         this.squads.forEach((squad) => {
             squad.attackTimer += dt;
 
@@ -204,12 +207,12 @@ class Game {
 
             this.attacks.push(
                 new Attack({
-                    attackerSquadId: squad.squadId, 
-                    targetSquadId: targetSquad.squadId, 
+                    attackerSquadId: squad.squadId,
+                    targetSquadId: targetSquad.squadId,
                     pos: {
-                        x: squad.pos.x, 
+                        x: squad.pos.x,
                         y: squad.pos.y
-                    }, 
+                    },
                     damages: damages
                 })
             );
@@ -227,7 +230,7 @@ class Game {
             squad.update({ dt: dt });
         });
 
-        this.updateCombat({dt: dt});
+        this.updateCombat({ dt: dt });
 
         this.attacks.forEach((attack) => {
             const targetSquad = this.squads.find(
@@ -235,9 +238,9 @@ class Game {
             );
 
             attack.update({
-                dt: dt, 
+                dt: dt,
                 targetPos: {
-                    x: targetSquad.pos.x, 
+                    x: targetSquad.pos.x,
                     y: targetSquad.pos.y
                 }
             });
@@ -261,7 +264,7 @@ class Game {
     getState() {
         return {
             time: this.time,
-            squads: this.squads, 
+            squads: this.squads,
             attacks: this.attacks
         };
     }

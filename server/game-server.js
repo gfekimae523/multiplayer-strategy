@@ -112,7 +112,7 @@ class GameServer {
                 playerId: this.connectionCounter
             });
 
-            ws.id = this.connectionCounter;
+            ws.playerId = this.connectionCounter;
             this.connectionCounter++;
 
             ws.on('message', (message) => {
@@ -121,7 +121,7 @@ class GameServer {
                 switch (data.type) {
                     case 'move':
                         this.game.setTargetPos({
-                            id: ws.id,
+                            playerId: ws.playerId,
                             targetPos: data.targetPos
                         });
                         break;
