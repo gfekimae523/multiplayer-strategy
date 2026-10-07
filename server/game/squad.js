@@ -1,6 +1,6 @@
 
 const { UNIT } = require('./constants.js');
-const { Unit } = require('./unit.js');
+const Unit = require('./unit.js');
 
 
 class Squad {
