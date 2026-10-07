@@ -49,14 +49,9 @@ function draw() {
     });
 
     gameState.attacks.forEach((attack) => {
-        const ratio = attack.time / attack.travelTime;
-
-        const x = attack.startPos.x + (attack.targetPos.x - attack.startPos.x) * ratio;
-        const y = attack.startPos.y + (attack.targetPos.y - attack.startPos.y) * ratio;
-
         ctx.fillStyle = 'rgb(255, 255, 255)';
         ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.arc(attack.pos.x, attack.pos.y, 5, 0, Math.PI * 2);
         ctx.fill();
     });
 }
