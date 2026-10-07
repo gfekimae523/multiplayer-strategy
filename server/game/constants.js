@@ -11,7 +11,7 @@ const UNIT = {
 const UNIT_STATUS = {
     goblin: {
         name: "ゴブリン", 
-        maxHp: 50,
+        maxHp: 30,
         physicalAttack: 10, 
         magicAttack: 0, 
         physicalDefense: 10, 
@@ -23,7 +23,7 @@ const UNIT_STATUS = {
 
     horse: {
         name: "ウマ", 
-        maxHp: 80,
+        maxHp: 50,
         physicalAttack: 15, 
         magicAttack: 0, 
         physicalDefense: 12, 
