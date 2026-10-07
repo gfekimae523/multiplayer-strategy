@@ -237,6 +237,11 @@ class Game {
                 squad => squad.squadId === attack.targetSquadId
             );
 
+            if (!targetSquad) {
+                attack.finished = true;
+                return;
+            }
+
             attack.update({
                 dt: dt,
                 targetPos: {
@@ -247,8 +252,10 @@ class Game {
 
             if (attack.finished) {
                 targetSquad.takeDamages(attack.damages);
-                if (targetSquad.units.size === 0) {
-                    this.removeSquad(targetSquad.squadId);
+                if (targetSquad.units.length === 0) {
+                    this.removeSquad({
+                        squadId: targetSquad.squadId
+                    });
                 }
             }
         });
