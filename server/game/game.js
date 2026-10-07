@@ -73,7 +73,7 @@ class Game {
         };
 
         const unitList = [
-            { type: UNIT.GOBLIN, count: 4 }
+            { type: UNIT.GOBLIN, count: 2 }
         ];
 
         this.addSquad({
