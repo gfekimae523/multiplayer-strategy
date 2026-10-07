@@ -38,7 +38,7 @@ function drawMySquadStatus() {
     squad.units.forEach((unit, index) => {
         // 名前
         ctx.fillText(
-            `${unit.name} ${unit.hp} / ${unit.maxHp}`,
+            `${unit.name} ${Math.ceil(unit.hp)} / ${unit.maxHp}`,
             x,
             y
         );

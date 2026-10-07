@@ -54,7 +54,7 @@ class Game {
 
     addPlayer({ playerId }) {
         const defaultUnitList = [
-            { type: UNIT.GOBLIN, count: 10 }
+            { type: UNIT.GOBLIN, count: 8 }
         ];
         this.addSquad({
             playerId: playerId,
