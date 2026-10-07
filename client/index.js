@@ -71,6 +71,59 @@ function drawMySquadStatus() {
     });
 }
 
+function drawEnemySquadStatus() {
+    if (!gameState) return;
+
+    gameState.squads.forEach((squad) => {
+        if (squad.faction !== FACTION.ENEMY) {
+            return;
+        }
+
+        // 部隊の総HPを計算
+        let hp = 0;
+        let maxHp = 0;
+
+        squad.units.forEach((unit) => {
+            hp += unit.hp;
+            maxHp += unit.maxHp;
+        });
+
+        const x = squad.pos.x - 40;
+        const y = squad.pos.y - 25;
+
+        ctx.font = '12px sans-serif';
+        ctx.fillStyle = 'black';
+
+        ctx.fillText(
+            `HP ${Math.ceil(hp)} / ${maxHp}`,
+            x,
+            y
+        );
+
+        // HPバー
+        const barWidth = 80;
+        const barHeight = 6;
+
+        const hpRate = maxHp > 0 ? hp / maxHp : 0;
+
+        ctx.fillStyle = 'gray';
+        ctx.fillRect(
+            x,
+            y + 4,
+            barWidth,
+            barHeight
+        );
+
+        ctx.fillStyle = 'red';
+        ctx.fillRect(
+            x,
+            y + 4,
+            barWidth * hpRate,
+            barHeight
+        );
+    });
+}
+
 function draw() {
     ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
 
@@ -105,6 +158,7 @@ function draw() {
     });
 
     drawMySquadStatus();
+    drawEnemySquadStatus();
 }
 
 function bindEvents() {
