@@ -20,7 +20,56 @@ ws.onmessage = (event) => {
 
 
 
+function drawMySquadStatus() {
+    if (!gameState) return;
 
+    const squad = gameState.squads.find(
+        squad => squad.playerId === gameState.playerId
+    );
+
+    if (!squad) return;
+
+    const x = 20;
+    let y = 30;
+
+    ctx.fillStyle = 'black';
+    ctx.font = '16px sans-serif';
+
+    squad.units.forEach((unit, index) => {
+        // 名前
+        ctx.fillText(
+            `${unit.name} ${unit.hp} / ${unit.maxHp}`,
+            x,
+            y
+        );
+
+        // HPバー
+        const barWidth = 150;
+        const barHeight = 10;
+
+        const hpRate = unit.hp / unit.maxHp;
+
+        ctx.fillStyle = 'gray';
+        ctx.fillRect(
+            x,
+            y + 5,
+            barWidth,
+            barHeight
+        );
+
+        ctx.fillStyle = 'green';
+        ctx.fillRect(
+            x,
+            y + 5,
+            barWidth * hpRate,
+            barHeight
+        );
+
+        ctx.fillStyle = 'black';
+
+        y += 35;
+    });
+}
 
 function draw() {
     ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
@@ -54,6 +103,8 @@ function draw() {
         ctx.arc(attack.pos.x, attack.pos.y, 5, 0, Math.PI * 2);
         ctx.fill();
     });
+
+    drawMySquadStatus();
 }
 
 function bindEvents() {
@@ -75,7 +126,6 @@ function bindEvents() {
 
 function mainloop() {
     draw();
-    console.log(gameState.squads)
     requestAnimationFrame(mainloop);
 }
 
@@ -85,7 +135,7 @@ function init() {
 
     gameState = {
         time: null,
-        squads: [], 
+        squads: [],
         attacks: []
     };
 
