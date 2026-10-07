@@ -15,7 +15,7 @@ class GameServer {
 
     lastTime;
     broadcastTimer;
-    connectionCount;
+    connectionCounter;
 
     constructor() {
         this.game = new Game();
@@ -59,7 +59,7 @@ class GameServer {
 
         this.lastTime = Date.now();
         this.broadcastTimer = 0;
-        this.connectionCount = 0;
+        this.connectionCounter = 0;
 
         this.setupWebSocket();
     }
@@ -109,11 +109,11 @@ class GameServer {
             console.log(`接続人数：${this.webSocketServer.clients.size}人`);
 
             this.game.addPlayer({
-                id: this.connectionCount
+                playerId: this.connectionCounter
             });
 
-            ws.id = this.connectionCount;
-            this.connectionCount++;
+            ws.id = this.connectionCounter;
+            this.connectionCounter++;
 
             ws.on('message', (message) => {
                 const data = JSON.parse(message);

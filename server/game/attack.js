@@ -2,44 +2,52 @@
 const ExplosionEffect = require('./effect.js');
 
 class Attack {
-    attackerSquad;
-    targetSquad;
-    startPos;
-    targetPos;
+    attackerSquadId;
+    targetSquadId;
+    pos;
+    damages;
 
-    time;
-    travelTime;
+    speed;
     finished;
 
-    constructor({ attackerSquad, targetSquad}) {
-        this.attackerSquad = attackerSquad;
-        this.targetSquad = targetSquad;
+    constructor({ attackerSquadId, targetSquadId, pos, damages }) {
+        this.attackerSquadId = attackerSquadId;
+        this.targetSquadId = targetSquadId;
 
-        this.startPos = {
-            x: attackerSquad.pos.x, 
-            y: attackerSquad.pos.y
+        this.pos = {
+            x: pos.x,
+            y: pos.y
         };
 
-        this.targetPos = {
-            x: targetSquad.pos.x, 
-            y: targetSquad.pos.y
-        };
-        
-        this.time = 0;
-        this.travelTime = 2;
+        this.damages = damages;
+
+        this.speed = 100;
         this.finished = false;
     }
 
-    update({dt}) {
-        this.time += dt;
-
-        if (this.time >= this.travelTime) {
-            const effect = this.hit();
-
-            return {effect: effect};
+    update({ dt, targetPos }) {
+        if (!targetPos) {
+            this.finished = true;
+            return;
         }
 
-        return null;
+        const diff = {
+            x: targetPos.x - this.pos.x,
+            y: targetPos.y - this.pos.y
+        };
+
+        const distance = Math.sqrt(diff.x ** 2 + diff.y ** 2);
+        const moveDistance = this.speed * dt;
+
+        if (distance <= moveDistance) {
+            this.pos.x = targetPos.x;
+            this.pos.y = targetPos.y;
+            this.finished = true;
+            return;
+        }
+
+        this.pos.x += diff.x / distance * moveDistance;
+        this.pos.y += diff.y / distance * moveDistance;
     }
 
     hit() {

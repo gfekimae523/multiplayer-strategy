@@ -12,7 +12,7 @@ class Game {
     time;
     enemySpawnTimer;
     targetSearchTimer;
-    enemyIdCounter;
+    squadCounter;
 
     squads;
     attacks;
@@ -29,17 +29,18 @@ class Game {
         this.time = 0;
         this.enemySpawnTimer = 0;
         this.targetSearchTimer = 0;
-        this.enemyIdCounter = 0;
+        this.squadCounter = 0;
 
         this.squads = [];
         this.attacks = [];
         this.effects = [];
     }
 
-    addSquad({ id, faction, spawnPos, unitList }) {
+    addSquad({ playerId, squadId, faction, spawnPos, unitList }) {
         this.squads.push(
             new Squad({
-                id: id,
+                playerId: playerId, 
+                squadId: squadId,
                 faction: faction,
                 spawnPos: spawnPos,
                 unitList: unitList
@@ -47,20 +48,22 @@ class Game {
         );
     }
 
-    removeSquad({ id }) {
-        this.squads = this.squads.filter(squad => squad.id !== id);
+    removeSquad({ squadId }) {
+        this.squads = this.squads.filter(squad => squad.squadId !== squadId);
     }
 
-    addPlayer({ id }) {
+    addPlayer({playerId}) {
         const defaultUnitList = [
             { type: UNIT.GOBLIN, count: 10 }
         ];
         this.addSquad({
-            id: id,
+            playerId: playerId, 
+            squadId: this.squadCounter,
             faction: FACTION.PLAYER,
             spawnPos: this.spawnPos,
             unitList: defaultUnitList
         });
+        this.squadCounter++;
     }
 
     addEnemy() {
@@ -74,11 +77,13 @@ class Game {
         ];
 
         this.addSquad({
-            id: `enemy-${this.enemyIdCounter}`,
+            playerId: null, 
+            squadId: this.squadCounter,
             faction: FACTION.ENEMY,
             spawnPos: spawnPos,
             unitList: unitList
         });
+        this.squadCounter++;
     }
 
     setTargetPos({ id, targetPos }) {
@@ -98,7 +103,6 @@ class Game {
         }
 
         this.addEnemy();
-        this.enemyIdCounter++;
         this.enemySpawnTimer = 0;
 
     }
@@ -178,7 +182,7 @@ class Game {
         return array[index];
     }
 
-    updateAttacks({dt}) {
+    updateCombat({dt}) {
         this.squads.forEach((squad) => {
             squad.attackTimer += dt;
 
@@ -196,10 +200,17 @@ class Game {
                 return;
             }
 
+            const damages = squad.getAttackDamages();
+
             this.attacks.push(
                 new Attack({
-                    attackerSquad: squad, 
-                    targetSquad: targetSquad
+                    attackerSquadId: squad.squadId, 
+                    targetSquadId: targetSquad.squadId, 
+                    pos: {
+                        x: squad.pos.x, 
+                        y: squad.pos.y
+                    }, 
+                    damages: damages
                 })
             );
 
@@ -216,13 +227,26 @@ class Game {
             squad.update({ dt: dt });
         });
 
-        this.updateAttacks({dt: dt});
+        this.updateCombat({dt: dt});
 
         this.attacks.forEach((attack) => {
-            const result = attack.update({dt: dt});
+            const targetSquad = this.squads.find(
+                squad => squad.squadId === attack.targetSquadId
+            );
 
-            if (result?.effect) {
-                this.effects.push(result.effect);
+            attack.update({
+                dt: dt, 
+                targetPos: {
+                    x: targetSquad.pos.x, 
+                    y: targetSquad.pos.y
+                }
+            });
+
+            if (attack.finished) {
+                targetSquad.takeDamages(attack.damages);
+                if (targetSquad.units.size === 0) {
+                    this.removeSquad(targetSquad.squadId);
+                }
             }
         });
 

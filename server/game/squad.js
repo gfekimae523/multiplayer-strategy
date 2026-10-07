@@ -1,15 +1,15 @@
 
 const { UNIT } = require('./constants.js');
-const { Goblin, Horse } = require('./unit.js');
+const { Unit } = require('./unit.js');
 
 
 class Squad {
-    id;
+    playerId;
+    squadId;
     faction;
     pos;
     targetPos;
 
-    targetSquad;
     attackTimer;
     attackCooldownTime;
     attackRange;
@@ -18,13 +18,13 @@ class Squad {
 
     speed;
 
-    constructor({ id, faction, spawnPos, unitList }) {
-        this.id = id;
+    constructor({ playerId, squadId, faction, spawnPos, unitList }) {
+        this.playerId = playerId;
+        this.squadId = squadId;
         this.faction = faction;
         this.pos = { x: spawnPos.x, y: spawnPos.y };
         this.targetPos = { x: spawnPos.x, y: spawnPos.y };
 
-        this.targetSquad = null;
         this.attackTimer = 0;
         this.attackCooldownTime = 6;
         this.attackRange = 100;
@@ -32,17 +32,7 @@ class Squad {
         this.units = [];
         unitList.forEach(({ type, count }) => {
             for (let i = 0; i < count; i++) {
-                let unit;
-                switch (type) {
-                    case UNIT.GOBLIN:
-                        unit = new Goblin();
-                        break;
-                    case UNIT.HORSE:
-                        unit = new Horse();
-                        break;
-                    default:
-                        console.log('不明なユニットです：' + type);
-                }
+                let unit = new Unit({type});
                 this.units.push(unit);
             }
         });
@@ -61,22 +51,89 @@ class Squad {
     }
 
     update({ dt }) {
+        if (!this.targetPos) {
+            return;
+        }
+
         const diff = {
             x: this.targetPos.x - this.pos.x,
             y: this.targetPos.y - this.pos.y
         };
+
         const distance = Math.sqrt(diff.x ** 2 + diff.y ** 2);
         const moveDistance = this.speed * dt;
 
         if (distance <= moveDistance) {
             this.pos.x = this.targetPos.x;
             this.pos.y = this.targetPos.y;
-        } else {
-            const rad = Math.atan2(diff.y, diff.x);
-            this.pos.x += Math.cos(rad) * moveDistance;
-            this.pos.y += Math.sin(rad) * moveDistance;
+            return;
         }
 
+        this.pos.x += diff.x / distance * moveDistance;
+        this.pos.y += diff.y / distance * moveDistance;
+    }
+
+    getAttackDamages() {
+        const damages = [];
+
+        this.units.forEach(unit => {
+            const existing = damages.find(attack =>
+                attack.physical === unit.physicalAttack &&
+                attack.magic === unit.magicAttack &&
+                attack.accuracy === unit.accuracy
+            );
+
+            if (existing) {
+                existing.count++;
+            } else {
+                damages.push({
+                    physical: unit.physicalAttack,
+                    magic: unit.magicAttack,
+                    accuracy: unit.accuracy,
+                    count: 1
+                });
+            }
+        });
+
+        return damages;
+    }
+
+    takeDamages(damages) {
+
+        damages.forEach(damage => {
+
+            this.units.forEach(unit => {
+
+                const hitRate =
+                    damage.accuracy /
+                    (damage.accuracy + unit.evasion);
+
+                if (Math.random() >= hitRate) {
+                    return;
+                }
+
+                const physicalDamage =
+                    damage.physical *
+                    damage.physical /
+                    (damage.physical + unit.physicalDefense) *
+                    damage.count /
+                    this.units.length;
+
+                const magicDamage =
+                    damage.magic *
+                    damage.magic /
+                    (damage.magic + unit.magicDefense) *
+                    damage.count /
+                    this.units.length;
+
+                unit.takeDamage({
+                    physicalDamage,
+                    magicDamage
+                });
+            });
+        });
+
+        this.units = this.units.filter(unit => !unit.isDead());
     }
 }
 

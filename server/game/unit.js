@@ -1,40 +1,46 @@
+
+const { UNIT_STATUS } = require('./constants.js');
+
 class Unit {
+    type;
+
+    name;
     maxHp;
     hp;
-    attack;
+    physicalAttack;
+    magicAttack;
+    physicalDefense;
+    magicDefense;
+    accuracy;
+    evasion;
     speed;
 
-    constructor({ maxHp, attack, speed }) {
-        this.maxHp = maxHp;
-        this.hp = maxHp;
-        this.attack = attack;
-        this.speed = speed;
+    constructor({ type }) {
+        const status = UNIT_STATUS[type];
+
+        this.type = type;
+        this.name = status.name;
+        this.maxHp = status.maxHp;
+        this.hp = status.maxHp;
+        this.physicalAttack = status.physicalAttack;
+        this.magicAttack = status.magicAttack;
+        this.physicalDefense = status.physicalDefense;
+        this.magicDefense = status.magicDefense;
+        this.accuracy = status.accuracy;
+        this.evasion = status.evasion;
+        this.speed = status.speed;
+    }
+
+    takeDamage({ physicalDamage = 0, magicDamage = 0 }) {
+        this.hp -= physicalDamage;
+        this.hp -= magicDamage;
+
+        this.hp = Math.max(this.hp, 0);
+    }
+
+    isDead() {
+        return this.hp <= 0;
     }
 }
 
-class Goblin extends Unit {
-    constructor() {
-        super({
-            maxHp: 30,
-            attack: 3,
-            speed: 20
-        });
-    }
-}
-
-class Horse extends Unit {
-    constructor() {
-        super({
-            maxHp: 50,
-            attack: 5,
-            speed: 40
-        });
-    }
-}
-
-
-module.exports = {
-    Unit,
-    Goblin,
-    Horse
-};
+module.exports = Unit;

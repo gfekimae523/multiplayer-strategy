@@ -33,7 +33,7 @@ function draw() {
     }
 
     gameState.squads.forEach((squad) => {
-        if (squad.id === gameState.playerId) {
+        if (squad.playerId === gameState.playerId) {
             ctx.fillStyle = 'rgb(0, 200, 0)';
         } else if (squad.faction === FACTION.PLAYER) {
             ctx.fillStyle = 'rgb(0, 0, 200)';
