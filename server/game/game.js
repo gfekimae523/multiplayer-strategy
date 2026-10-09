@@ -252,7 +252,7 @@ class Game {
 
             if (attack.finished) {
                 targetSquad.takeDamages(attack.damages);
-                if (targetSquad.units.length === 0) {
+                if (targetSquad.isDead()) {
                     this.removeSquad({
                         squadId: targetSquad.squadId
                     });

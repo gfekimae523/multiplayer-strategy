@@ -32,13 +32,13 @@ class Squad {
         this.units = [];
         unitList.forEach(({ type, count }) => {
             for (let i = 0; i < count; i++) {
-                let unit = new Unit({type});
+                let unit = new Unit({ type });
                 this.units.push(unit);
             }
         });
         let minSpeed = (this.units.length > 0) ? Infinity : 0;
         for (let i = 0; i < this.units.length; i++) {
-            minSpeed = Math.min(this.units[i].speed, minSpeed);
+            minSpeed = Math.min(this.units[i].data.speed, minSpeed);
         }
         this.speed = (Number.isFinite(minSpeed)) ? minSpeed : 0;
     }
@@ -78,18 +78,18 @@ class Squad {
 
         this.units.forEach(unit => {
             const existing = damages.find(attack =>
-                attack.physical === unit.physicalAttack &&
-                attack.magic === unit.magicAttack &&
-                attack.accuracy === unit.accuracy
+                attack.physical === unit.data.physicalAttack &&
+                attack.magic === unit.data.magicAttack &&
+                attack.accuracy === unit.data.accuracy
             );
 
             if (existing) {
                 existing.count++;
             } else {
                 damages.push({
-                    physical: unit.physicalAttack,
-                    magic: unit.magicAttack,
-                    accuracy: unit.accuracy,
+                    physical: unit.data.physicalAttack,
+                    magic: unit.data.magicAttack,
+                    accuracy: unit.data.accuracy,
                     count: 1
                 });
             }
@@ -106,7 +106,7 @@ class Squad {
 
                 const hitRate =
                     damage.accuracy /
-                    (damage.accuracy + unit.evasion);
+                    (damage.accuracy + unit.data.evasion);
 
                 if (Math.random() >= hitRate) {
                     return;
@@ -115,25 +115,28 @@ class Squad {
                 const physicalDamage =
                     damage.physical *
                     damage.physical /
-                    (damage.physical + unit.physicalDefense) *
+                    (damage.physical + unit.data.physicalDefense) *
                     damage.count /
                     this.units.length;
 
                 const magicDamage =
                     damage.magic *
                     damage.magic /
-                    (damage.magic + unit.magicDefense) *
+                    (damage.magic + unit.data.magicDefense) *
                     damage.count /
                     this.units.length;
 
-                unit.takeDamage({
-                    physicalDamage,
-                    magicDamage
+                unit.data.takeDamage({
+                    damage: physicalDamage + magicDamage
                 });
             });
         });
 
         this.units = this.units.filter(unit => !unit.isDead());
+    }
+
+    isDead() {
+        return this.units.length === 0;
     }
 }
 
