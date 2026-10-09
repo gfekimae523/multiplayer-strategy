@@ -6,8 +6,6 @@ const { FACTION, UNIT } = require('./constants.js');
 
 
 class Game {
-    spawnPos;
-
     time;
     enemySpawnTimer;
     targetSearchTimer;
@@ -20,11 +18,6 @@ class Game {
 
     constructor() {
         this.battleMap = new BattleMap();
-
-        this.spawnPos = {
-            x: this.battleMap.width / 2,
-            y: this.battleMap.height / 2
-        };
 
         this.time = 0;
         this.enemySpawnTimer = 0;
@@ -60,7 +53,7 @@ class Game {
             playerId: playerId,
             squadId: this.squadCounter,
             faction: FACTION.PLAYER,
-            spawnPos: this.spawnPos,
+            spawnPos: this.battleMap.spawnPos,
             unitList: defaultUnitList
         });
         this.squadCounter++;
@@ -141,7 +134,9 @@ class Game {
     }
 
     updateEnemyTargets() {
-        if (this.targetSearchTimer < 1) {
+        const TARGET_SEARCH_INTERVAL = 2;
+        
+        if (this.targetSearchTimer < TARGET_SEARCH_INTERVAL) {
             return;
         }
 

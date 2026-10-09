@@ -8,16 +8,25 @@ class BattleMap {
 
     columns;
     rows;
-
     tileSize;
+    width;
+    height;
+    
+    spawnPos;
 
     constructor() {
         this.name = "テストマップ";
 
         this.columns = 80;
         this.rows = 60;
-        
         this.tileSize = 10;
+        this.width = this.tileSize * this.columns;
+        this.height = this.tileSize * this.rows;
+
+        this.spawnPos = {
+            x: this.width / 2, 
+            y: this.height / 2
+        };
 
         this.tiles = [];
         for (let y = 0; y < this.columns; y++) {
@@ -31,14 +40,6 @@ class BattleMap {
 
             this.tiles.push(row);
         }
-    }
-
-    get width() {
-        return this.columns * this.tileSize;
-    }
-
-    get height() {
-        return this.rows * this.tileSize;
     }
 }
 
