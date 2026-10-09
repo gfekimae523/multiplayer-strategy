@@ -126,7 +126,7 @@ class Squad {
                     damage.count /
                     this.units.length;
 
-                unit.data.takeDamage({
+                unit.takeDamage({
                     damage: physicalDamage + magicDamage
                 });
             });
