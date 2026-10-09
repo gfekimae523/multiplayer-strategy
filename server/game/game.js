@@ -1,12 +1,11 @@
 
-const { FACTION, UNIT } = require('./constants.js');
+const BattleMap = require('./battle-map.js');
 const Squad = require('./squad.js');
 const Attack = require('./attack.js');
+const { FACTION, UNIT } = require('./constants.js');
 
 
 class Game {
-    width;
-    height;
     spawnPos;
 
     time;
@@ -14,16 +13,17 @@ class Game {
     targetSearchTimer;
     squadCounter;
 
+    battleMap;
     squads;
     attacks;
     effects;
 
     constructor() {
-        this.width = 800;
-        this.height = 600;
+        this.battleMap = new BattleMap();
+
         this.spawnPos = {
-            x: this.width / 2,
-            y: this.height / 2
+            x: this.battleMap.width / 2,
+            y: this.battleMap.height / 2
         };
 
         this.time = 0;
@@ -68,7 +68,7 @@ class Game {
 
     addEnemy() {
         const spawnPos = {
-            x: Math.random() * this.width,
+            x: Math.random() * this.battleMap.width,
             y: 0
         };
 
@@ -97,11 +97,14 @@ class Game {
     }
 
     spawnEnemy() {
-        if (this.enemySpawnTimer < 10) {
+        const MAX_ENEMY_COUNT = 5;
+        const ENEMY_SPAWN_INTERVAL = 10;
+
+        if (this.enemySpawnTimer < ENEMY_SPAWN_INTERVAL) {
             return;
         }
         const enemyCount = this.squads.filter(squad => squad.faction === FACTION.ENEMY).length;
-        if (enemyCount >= 5) {
+        if (enemyCount >= MAX_ENEMY_COUNT) {
             return;
         }
 
@@ -271,8 +274,10 @@ class Game {
     getState() {
         return {
             time: this.time,
+            battleMap: this.battleMap, 
             squads: this.squads,
-            attacks: this.attacks
+            attacks: this.attacks, 
+            effects: this.effects
         };
     }
 }

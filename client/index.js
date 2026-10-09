@@ -30,6 +30,7 @@ let camera = {
 
 let playerId;
 let gameState;
+let battleMap;
 let squads;
 let attacks;
 let effects;
@@ -48,10 +49,10 @@ ws.onmessage = (event) => {
             UNIT_DATA = data.unitData;
             TERRAIN = data.terrain;
             TERRAIN_DATA = data.terrainData;
-            console.log('設定されたplayerId:', playerId);
             break;
         case 'snapshot':
             gameState = data.gameState;
+            battleMap = gameState.battleMap;
             squads = gameState.squads;
             attacks = gameState.attacks;
             effects = gameState.effects;
