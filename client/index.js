@@ -248,6 +248,7 @@ function bindEvents() {
 }
 
 function mainloop() {
+    console.log(playerId);
     updateCamera();
     draw();
 
