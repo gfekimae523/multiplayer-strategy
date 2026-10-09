@@ -16,6 +16,7 @@ class Squad {
 
     units;
 
+    maxHp;
     speed;
 
     constructor({ playerId, squadId, faction, spawnPos, unitList }) {
@@ -39,6 +40,11 @@ class Squad {
         let minSpeed = (this.units.length > 0) ? Infinity : 0;
         for (let i = 0; i < this.units.length; i++) {
             minSpeed = Math.min(this.units[i].data.speed, minSpeed);
+        }
+
+        this.maxHp = 0;
+        for (let i = 0; i < this.units.length; i++) {
+            this.maxHp = this.units.data.maxHp;
         }
         this.speed = (Number.isFinite(minSpeed)) ? minSpeed : 0;
     }

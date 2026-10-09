@@ -1,8 +1,9 @@
 
-const FACTION = {
-    PLAYER: "player",
-    ENEMY: "enemy"
-};
+let FACTION;
+let UNIT;
+let UNIT_DATA;
+let TERRAIN;
+let TERRAIN_DATA;
 
 
 const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -38,11 +39,24 @@ let pressedKeys = {};
 
 
 ws.onmessage = (event) => {
-    gameState = JSON.parse(event.data);
-    playerId = gameState.playerId;
-    squads = gameState.squads;
-    attacks = gameState.attacks;
-    effects = gameState.effects;
+    const data = JSON.parse(event.data);
+    switch (data.type) {
+        case 'init':
+            playerId = data.playerId;
+            FACTION = data.faction;
+            UNIT = data.unit;
+            UNIT_DATA = data.unitData;
+            TERRAIN = data.terrain;
+            TERRAIN_DATA = data.terrainData;
+            break;
+        case 'snapshot':
+            gameState = data.gameState;
+            squads = gameState.squads;
+            attacks = gameState.attacks;
+            effects = gameState.effects;
+            break;
+    }
+
 };
 
 function updateCamera() {

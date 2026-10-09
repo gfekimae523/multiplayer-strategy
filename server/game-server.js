@@ -5,6 +5,7 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 
 const Game = require('./game/game.js');
+const { FACTION, UNIT, UNIT_DATA, TERRAIN, TERRAIN_DATA } = require('./game/constants.js');
 
 const PORT = process.env.PORT || 8080;
 
@@ -97,14 +98,26 @@ class GameServer {
         }
     }
 
+    sendInitialData(ws) {
+        ws.send(JSON.stringify({
+            type: 'init',
+            playerId: ws.playerId, 
+            faction: FACTION,
+            unit: UNIT,
+            unitData: UNIT_DATA,
+            terrain: TERRAIN,
+            terrainData: TERRAIN_DATA
+        }));
+    }
+
     broadcast() {
         const gameState = this.game.getState();
 
         this.webSocketServer.clients.forEach((client) => {
             if (client.readyState === 1) {
                 client.send(JSON.stringify({
-                    playerId: client.playerId,
-                    ...gameState
+                    type: 'snapshot', 
+                    gameState: gameState
                 }));
             }
         });
@@ -120,6 +133,9 @@ class GameServer {
             });
 
             ws.playerId = this.connectionCounter;
+
+            this.sendInitialData(ws);
+
             this.connectionCounter++;
 
             ws.on('message', (message) => {
