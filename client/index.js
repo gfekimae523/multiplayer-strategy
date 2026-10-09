@@ -48,6 +48,7 @@ ws.onmessage = (event) => {
             UNIT_DATA = data.unitData;
             TERRAIN = data.terrain;
             TERRAIN_DATA = data.terrainData;
+            console.log('設定されたplayerId:', playerId);
             break;
         case 'snapshot':
             gameState = data.gameState;
@@ -79,7 +80,7 @@ function updateCamera() {
 
 function drawMySquadStatus() {
     if (!squads) return;
-    if (!playerId) return;
+    if (playerId === null) return;
 
     const squad = squads.find(
         squad => squad.playerId === playerId
@@ -96,7 +97,7 @@ function drawMySquadStatus() {
     squad.units.forEach((unit) => {
         // 名前
         ctx.fillText(
-            `${unit.name} ${Math.ceil(unit.hp)} / ${UNIT_DATA[unit.type].maxHp}`,
+            `${UNIT_DATA[unit.type].name} ${Math.ceil(unit.hp)} / ${UNIT_DATA[unit.type].maxHp}`,
             x,
             y
         );
@@ -262,7 +263,6 @@ function bindEvents() {
 }
 
 function mainloop() {
-    console.log(playerId);
     updateCamera();
     draw();
 
