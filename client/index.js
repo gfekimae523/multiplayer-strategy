@@ -96,7 +96,7 @@ function drawMySquadStatus() {
     squad.units.forEach((unit) => {
         // 名前
         ctx.fillText(
-            `${unit.name} ${Math.ceil(unit.hp)} / ${unit.data.maxHp}`,
+            `${unit.name} ${Math.ceil(unit.hp)} / ${UNIT_DATA[unit.type].maxHp}`,
             x,
             y
         );
@@ -105,7 +105,7 @@ function drawMySquadStatus() {
         const barWidth = 150;
         const barHeight = 10;
 
-        const hpRate = unit.hp / unit.data.maxHp;
+        const hpRate = unit.hp / UNIT_DATA[unit.type].maxHp;
 
         ctx.fillStyle = 'gray';
         ctx.fillRect(
@@ -143,7 +143,7 @@ function drawEnemySquadStatus() {
 
         squad.units.forEach((unit) => {
             hp += unit.hp;
-            maxHp += unit.data.maxHp;
+            maxHp += UNIT_DATA[unit.type].maxHp;
         });
 
         const posV = convertPosWToV(squad.pos);
