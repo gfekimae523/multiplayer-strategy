@@ -216,10 +216,8 @@ function bindEvents() {
         const rect = mainCanvas.getBoundingClientRect();
 
         const posV = {
-            x: (event.clientX - rect.left)
-                * mainCanvas.width / rect.width,
-            y: (event.clientY - rect.top)
-                * mainCanvas.height / rect.height
+            x: (event.clientX - rect.left) * mainCanvas.width / rect.width,
+            y: (event.clientY - rect.top) * mainCanvas.height / rect.height
         };
 
         const posW = convertPosVToW(posV);
@@ -252,7 +250,7 @@ function bindEvents() {
 function mainloop() {
     updateCamera();
     draw();
-    
+
     requestAnimationFrame(mainloop);
 }
 

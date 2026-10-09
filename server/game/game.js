@@ -97,7 +97,7 @@ class Game {
     }
 
     spawnEnemy() {
-        if (this.enemySpawnTimer < 5) {
+        if (this.enemySpawnTimer < 10) {
             return;
         }
         const enemyCount = this.squads.filter(squad => squad.faction === FACTION.ENEMY).length;

@@ -27,6 +27,8 @@ class GameServer {
                 filePath = path.join(__dirname, '..', 'client', 'index.html');
             } else if (req.url === '/index.js') {
                 filePath = path.join(__dirname, '..', 'client', 'index.js');
+            } else if (req.url === '/style.css') {
+                filePath = path.join(__dirname, '..', 'client', 'style.css');
             } else {
                 res.writeHead(404);
                 res.end('Not Found');
@@ -40,10 +42,15 @@ class GameServer {
                     return;
                 }
 
-                const contentType =
-                    req.url === '/index.js'
-                        ? 'text/javascript'
-                        : 'text/html';
+                const ext = path.extname(filePath);
+
+                const contentTypes = {
+                    '.html': 'text/html; charset=utf-8',
+                    '.js': 'text/javascript; charset=utf-8',
+                    '.css': 'text/css; charset=utf-8'
+                };
+
+                const contentType = contentTypes[ext] || 'application/octet-stream';
 
                 res.writeHead(200, {
                     'Content-Type': contentType
