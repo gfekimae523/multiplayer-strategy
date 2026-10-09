@@ -4,27 +4,71 @@ const FACTION = {
     ENEMY: "enemy"
 };
 
+
 const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
 const ws = new WebSocket(`${protocol}//${location.host}`);
+
 
 let mainCanvas;
 let ctx;
 
+
+let world = {
+    width: 800,
+    height: 600
+};
+
+let camera = {
+    zoom: 2,
+    centerPos: {
+        x: 400,
+        y: 300
+    },
+    moveSpeed: 5
+};
+
+let playerId;
 let gameState;
+let squads;
+let attacks;
+let effects;
+
+let pressedKeys = {};
 
 
 
 ws.onmessage = (event) => {
     gameState = JSON.parse(event.data);
+    playerId = gameState.playerId;
+    squads = gameState.squads;
+    attacks = gameState.attacks;
+    effects = gameState.effects;
 };
 
+function updateCamera() {
+    if (pressedKeys['w']) {
+        camera.centerPos.y -= camera.moveSpeed;
+    }
 
+    if (pressedKeys['s']) {
+        camera.centerPos.y += camera.moveSpeed;
+    }
+
+    if (pressedKeys['a']) {
+        camera.centerPos.x -= camera.moveSpeed;
+    }
+
+    if (pressedKeys['d']) {
+        camera.centerPos.x += camera.moveSpeed;
+    }
+}
 
 function drawMySquadStatus() {
-    if (!gameState) return;
+    if (!squads) return;
+    if (!playerId) return;
 
-    const squad = gameState.squads.find(
-        squad => squad.playerId === gameState.playerId
+    const squad = squads.find(
+        squad => squad.playerId === playerId
     );
 
     if (!squad) return;
@@ -35,7 +79,7 @@ function drawMySquadStatus() {
     ctx.fillStyle = 'black';
     ctx.font = '16px sans-serif';
 
-    squad.units.forEach((unit, index) => {
+    squad.units.forEach((unit) => {
         // 名前
         ctx.fillText(
             `${unit.name} ${Math.ceil(unit.hp)} / ${unit.maxHp}`,
@@ -72,9 +116,9 @@ function drawMySquadStatus() {
 }
 
 function drawEnemySquadStatus() {
-    if (!gameState) return;
+    if (!squads) return;
 
-    gameState.squads.forEach((squad) => {
+    squads.forEach((squad) => {
         if (squad.faction !== FACTION.ENEMY) {
             return;
         }
@@ -88,8 +132,10 @@ function drawEnemySquadStatus() {
             maxHp += unit.maxHp;
         });
 
-        const x = squad.pos.x - 40;
-        const y = squad.pos.y - 25;
+        const posV = convertPosWToV(squad.pos);
+
+        const x = posV.x - 40;
+        const y = posV.y - 25;
 
         ctx.font = '12px sans-serif';
         ctx.fillStyle = 'black';
@@ -134,8 +180,10 @@ function draw() {
         return;
     }
 
-    gameState.squads.forEach((squad) => {
-        if (squad.playerId === gameState.playerId) {
+    squads.forEach((squad) => {
+        const posV = convertPosWToV(squad.pos);
+
+        if (squad.playerId === playerId) {
             ctx.fillStyle = 'rgb(0, 200, 0)';
         } else if (squad.faction === FACTION.PLAYER) {
             ctx.fillStyle = 'rgb(0, 0, 200)';
@@ -143,17 +191,19 @@ function draw() {
             ctx.fillStyle = 'rgb(200, 0, 0)';
         }
         ctx.fillRect(
-            squad.pos.x - 5,
-            squad.pos.y - 5,
+            posV.x - 5,
+            posV.y - 5,
             10,
             10
         );
     });
 
-    gameState.attacks.forEach((attack) => {
+    attacks.forEach((attack) => {
+        const posV = convertPosWToV(attack.pos);
+
         ctx.fillStyle = 'rgb(255, 255, 255)';
         ctx.beginPath();
-        ctx.arc(attack.pos.x, attack.pos.y, 5, 0, Math.PI * 2);
+        ctx.arc(posV.x, posV.y, 5, 0, Math.PI * 2);
         ctx.fill();
     });
 
@@ -165,21 +215,44 @@ function bindEvents() {
     mainCanvas.addEventListener('click', (event) => {
         const rect = mainCanvas.getBoundingClientRect();
 
-        const x = (event.clientX - rect.left) * mainCanvas.width / rect.width;
-        const y = (event.clientY - rect.top) * mainCanvas.height / rect.height;
+        const posV = {
+            x: (event.clientX - rect.left)
+                * mainCanvas.width / rect.width,
+            y: (event.clientY - rect.top)
+                * mainCanvas.height / rect.height
+        };
+
+        const posW = convertPosVToW(posV);
 
         ws.send(JSON.stringify({
             type: 'move',
-            targetPos: {
-                x: x,
-                y: y
-            }
+            targetPos: posW
         }));
+    });
+
+    window.addEventListener('keydown', (event) => {
+        const key = event.key.toLowerCase();
+
+        if (['w', 'a', 's', 'd'].includes(key)) {
+            event.preventDefault();
+            pressedKeys[key] = true;
+        }
+    });
+
+    window.addEventListener('keyup', (event) => {
+        const key = event.key.toLowerCase();
+        pressedKeys[key] = false;
+    });
+
+    window.addEventListener('blur', () => {
+        pressedKeys = {};
     });
 }
 
 function mainloop() {
+    updateCamera();
     draw();
+    
     requestAnimationFrame(mainloop);
 }
 
@@ -187,15 +260,31 @@ function init() {
     mainCanvas = document.querySelector('.mainCanvas');
     ctx = mainCanvas.getContext('2d');
 
-    gameState = {
-        time: null,
-        squads: [],
-        attacks: []
-    };
+    playerId = null;
+    gameState = null;
+    squads = [];
+    attacks = [];
+    effects = [];
 
     bindEvents();
 
     requestAnimationFrame(mainloop);
+}
+
+function convertPosWToV(posW) {
+    const posV = {
+        x: (posW.x - camera.centerPos.x) * camera.zoom + mainCanvas.width / 2,
+        y: (posW.y - camera.centerPos.y) * camera.zoom + mainCanvas.height / 2
+    };
+    return posV;
+}
+
+function convertPosVToW(posV) {
+    const posW = {
+        x: (posV.x - mainCanvas.width / 2) / camera.zoom + camera.centerPos.x,
+        y: (posV.y - mainCanvas.height / 2) / camera.zoom + camera.centerPos.y
+    };
+    return posW;
 }
 
 document.addEventListener('DOMContentLoaded', init);

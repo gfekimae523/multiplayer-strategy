@@ -18,7 +18,7 @@ const UNIT_STATUS = {
         magicDefense: 10, 
         accuracy: 100, 
         evasion: 50, 
-        speed: 20
+        speed: 10
     },
 
     horse: {
@@ -30,7 +30,7 @@ const UNIT_STATUS = {
         magicDefense: 12, 
         accuracy: 100, 
         evasion: 60, 
-        speed: 40
+        speed: 20
     }
 };
 
