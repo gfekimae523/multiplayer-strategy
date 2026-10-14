@@ -21,7 +21,7 @@ class Attack {
 
         this.damages = damages;
 
-        this.speed = 100;
+        this.speed = 20;
         this.finished = false;
     }
 

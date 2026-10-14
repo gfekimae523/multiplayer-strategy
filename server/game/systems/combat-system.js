@@ -46,7 +46,7 @@ class CombatSystem {
         });
     }
 
-    updateAttacks({ dt, squads, attacks }) {
+    updateAttacks({ squads, attacks }) {
         attacks.forEach((attack) => {
             const targetSquad = squads.find(
                 squad => squad.squadId === attack.targetSquadId
@@ -104,7 +104,7 @@ class CombatSystem {
 
         enemySquads.forEach((enemySquad) => {
             const targetSquad = this.#getNearestSquad({
-                squads: playerSquads, 
+                squads: playerSquads,
                 pos: enemySquad.pos
             });
 

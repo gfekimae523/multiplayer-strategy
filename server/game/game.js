@@ -11,7 +11,7 @@ const { FACTION, UNIT } = require('./constants.js');
 
 
 class Game {
-    time;
+    gameTime;
     enemySpawnTimer;
     squadCounter;
 
@@ -115,7 +115,6 @@ class Game {
         });
 
         this.combatSystem.updateAttacks({
-            dt: dt,
             squads: this.squads,
             attacks: this.attacks
         });
