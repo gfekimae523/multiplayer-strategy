@@ -57,14 +57,6 @@ class CombatSystem {
                 return;
             }
 
-            attack.update({
-                dt: dt,
-                targetPos: {
-                    x: targetSquad.pos.x,
-                    y: targetSquad.pos.y
-                }
-            });
-
             if (attack.finished) {
                 targetSquad.takeDamages(attack.damages);
             }
