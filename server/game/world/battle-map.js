@@ -39,8 +39,8 @@ class BattleMap {
                         x: x, 
                         y: y, 
                         centerPos: {
-                            x: tileSize * (x + 0.5), 
-                            y: tileSize * (y + 0.5)
+                            x: this.tileSize * (x + 0.5), 
+                            y: this.tileSize * (y + 0.5)
                         }
                     })
                 );
