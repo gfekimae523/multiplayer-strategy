@@ -25,7 +25,7 @@ class Attack {
         this.finished = false;
     }
 
-    update({ dt, targetPos }) {
+    move({ dt, targetPos }) {
         if (!targetPos) {
             this.finished = true;
             return;

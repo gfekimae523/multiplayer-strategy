@@ -54,7 +54,7 @@ class Squad {
         };
     }
 
-    update({ dt }) {
+    move({ dt }) {
         if (!this.targetPos) {
             return;
         }
