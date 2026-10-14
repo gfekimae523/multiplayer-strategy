@@ -21,7 +21,7 @@ class Attack {
 
         this.damages = damages;
 
-        this.speed = 20;
+        this.speed = 100;
         this.finished = false;
     }
 
@@ -50,19 +50,15 @@ class Attack {
         this.pos.y += diff.y / distance * moveDistance;
     }
 
-    hit() {
-        //回避判定
-        //ダメージ処理
-        //ExplosionEffect生成
+    // hit() {
+    //     const effect = new ExplosionEffect({
+    //         pos: this.targetPos
+    //     });
 
-        const effect = new ExplosionEffect({
-            pos: this.targetPos
-        });
+    //     this.finished = true;
 
-        this.finished = true;
-
-        return effect;
-    }
+    //     return effect;
+    // }
 }
 
 module.exports = Attack;

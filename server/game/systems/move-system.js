@@ -1,16 +1,18 @@
-
 class MoveSystem {
-    constructor() {
-
-    }
-
     updateMove({ dt, squads, attacks }) {
         squads.forEach((squad) => {
-            squad.move({ dt: dt });
+            squad.move({ dt });
         });
 
         attacks.forEach((attack) => {
-            attack.move({ dt: dt });
+            const targetSquad = squads.find(
+                squad => squad.squadId === attack.targetSquadId
+            );
+
+            attack.move({
+                dt,
+                targetPos: targetSquad?.pos
+            });
         });
     }
 }
