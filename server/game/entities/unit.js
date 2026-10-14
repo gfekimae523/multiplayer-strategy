@@ -1,5 +1,5 @@
 
-const { UNIT_DATA } = require('./constants.js');
+const { UNIT_DATA } = require('../constants.js');
 
 class Unit {
     type;

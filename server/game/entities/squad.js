@@ -1,5 +1,5 @@
 
-const { UNIT } = require('./constants.js');
+const { UNIT } = require('../constants.js');
 const Unit = require('./unit.js');
 
 
@@ -15,6 +15,7 @@ class Squad {
     attackRange;
 
     units;
+    unitList;
 
     speed;
 
@@ -36,6 +37,8 @@ class Squad {
                 this.units.push(unit);
             }
         });
+        this.updateUnitList();
+
         let minSpeed = (this.units.length > 0) ? Infinity : 0;
         for (let i = 0; i < this.units.length; i++) {
             minSpeed = Math.min(this.units[i].data.speed, minSpeed);
@@ -56,12 +59,10 @@ class Squad {
             return;
         }
 
-        const diff = {
-            x: this.targetPos.x - this.pos.x,
-            y: this.targetPos.y - this.pos.y
-        };
+        const dx = this.targetPos.x - this.pos.x;
+        const dy = this.targetPos.y - this.pos.y;
 
-        const distance = Math.sqrt(diff.x ** 2 + diff.y ** 2);
+        const distance = Math.sqrt(dx ** 2 + dy ** 2);
         const moveDistance = this.speed * dt;
 
         if (distance <= moveDistance) {
@@ -70,8 +71,18 @@ class Squad {
             return;
         }
 
-        this.pos.x += diff.x / distance * moveDistance;
-        this.pos.y += diff.y / distance * moveDistance;
+        this.pos.x += dx / distance * moveDistance;
+        this.pos.y += dy / distance * moveDistance;
+    }
+
+    updateUnitList() {
+        this.unitList = {};
+        this.units.forEach((unit) => {
+            if (this.unitList[unit.type] === undefined) {
+                this.unitList[unit.type] = 0;
+            }
+            this.unitList[unit.type]++;
+        });
     }
 
     getAttackDamages() {
@@ -134,6 +145,7 @@ class Squad {
         });
 
         this.units = this.units.filter(unit => !unit.isDead());
+        this.updateUnitList();
     }
 
     isDead() {

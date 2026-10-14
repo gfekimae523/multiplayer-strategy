@@ -1,6 +1,6 @@
 
 const Tile = require('./tile.js');
-const { TERRAIN } = require('./constants.js');
+const { TERRAIN } = require('../constants.js');
 
 class BattleMap {
     name;
@@ -11,7 +11,7 @@ class BattleMap {
     tileSize;
     width;
     height;
-    
+
     spawnPos;
 
     constructor() {
@@ -24,18 +24,26 @@ class BattleMap {
         this.height = this.tileSize * this.rows;
 
         this.spawnPos = {
-            x: this.width / 2, 
+            x: this.width / 2,
             y: this.height / 2
         };
 
         this.tiles = [];
-        for (let y = 0; y < this.columns; y++) {
+        for (let y = 0; y < this.rows; y++) {
             const row = [];
 
-            for (let x = 0; x < this.rows; x++) {
-                row.push(new Tile({
-                    type: TERRAIN.PLAIN
-                }));
+            for (let x = 0; x < this.columns; x++) {
+                row.push(
+                    new Tile({
+                        type: TERRAIN.PLAIN, 
+                        x: x, 
+                        y: y, 
+                        centerPos: {
+                            x: tileSize * (x + 0.5), 
+                            y: tileSize * (y + 0.5)
+                        }
+                    })
+                );
             }
 
             this.tiles.push(row);

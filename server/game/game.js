@@ -1,14 +1,18 @@
 
-const BattleMap = require('./battle-map.js');
-const Squad = require('./squad.js');
-const Attack = require('./attack.js');
+const Squad = require('./entities/squad.js');
+const Attack = require('./entities/attack.js');
+const BattleMap = require('./world/battle-map.js');
+
+const MoveSystem = require('./systems/move-system.js');
+const VisionSystem = require('./systems/vision-system.js');
+const CombatSystem = require('./systems/combat-system.js');
+
 const { FACTION, UNIT } = require('./constants.js');
 
 
 class Game {
     time;
     enemySpawnTimer;
-    targetSearchTimer;
     squadCounter;
 
     battleMap;
@@ -16,12 +20,19 @@ class Game {
     attacks;
     effects;
 
+    moveSystem;
+    visionSystem;
+    combatSystem;
+
     constructor() {
         this.battleMap = new BattleMap();
 
+        this.moveSystem = new MoveSystem();
+        this.visionSystem = new VisionSystem();
+        this.combatSystem = new CombatSystem();
+
         this.time = 0;
         this.enemySpawnTimer = 0;
-        this.targetSearchTimer = 0;
         this.squadCounter = 0;
 
         this.squads = [];
@@ -79,6 +90,46 @@ class Game {
         this.squadCounter++;
     }
 
+
+
+
+
+    update({ dt }) {
+        this.time += dt;
+
+        this.moveSystem.updateMove({
+            dt: dt,
+            squads: this.squads,
+            attacks: this.attacks
+        });
+
+        this.visionSystem.updateVision({
+            squads: this.squads,
+            battleMap: this.battleMap
+        });
+
+        this.combatSystem.createAttacks({
+            dt: dt,
+            squads: this.squads,
+            attacks: this.attacks
+        });
+
+        this.combatSystem.updateAttacks({
+            dt: dt,
+            squads: this.squads,
+            attacks: this.attacks
+        });
+
+        this.#cleanUp();
+
+        this.#spawnEnemy({ dt: dt });
+
+        this.combatSystem.updateTargets({
+            dt: dt,
+            squads: this.squads
+        });
+    }
+
     setTargetPos({ playerId, targetPos }) {
         const squad = this.squads.find(
             squad => squad.playerId === playerId
@@ -89,9 +140,31 @@ class Game {
         squad.setTargetPos(targetPos);
     }
 
-    spawnEnemy() {
+    getState() {
+        return {
+            time: this.time,
+            battleMap: this.battleMap,
+            squads: this.squads,
+            attacks: this.attacks,
+            effects: this.effects
+        };
+    }
+
+    #cleanUp() {
+        this.squads = this.squads.filter(
+            squad => !squad.isDead()
+        );
+
+        this.attacks = this.attacks.filter(
+            attack => !attack.finished
+        );
+    }
+
+    #spawnEnemy({ dt: dt }) {
         const MAX_ENEMY_COUNT = 5;
         const ENEMY_SPAWN_INTERVAL = 10;
+
+        this.enemySpawnTimer += dt;
 
         if (this.enemySpawnTimer < ENEMY_SPAWN_INTERVAL) {
             return;
@@ -103,177 +176,6 @@ class Game {
 
         this.addEnemy();
         this.enemySpawnTimer = 0;
-
-    }
-
-    getNearestPlayerSquad({ pos }) {
-        const playerSquads = this.squads.filter(
-            squad => squad.faction === FACTION.PLAYER
-        );
-
-        if (playerSquads.length === 0) {
-            return null;
-        }
-
-        let nearestSquad = null;
-        let nearestDistance = Infinity;
-
-        playerSquads.forEach((squad) => {
-            const dx = squad.pos.x - pos.x;
-            const dy = squad.pos.y - pos.y;
-
-            const distance = Math.sqrt(dx ** 2 + dy ** 2);
-
-            if (distance < nearestDistance) {
-                nearestDistance = distance;
-                nearestSquad = squad;
-            }
-        });
-
-        return nearestSquad;
-    }
-
-    updateEnemyTargets() {
-        const TARGET_SEARCH_INTERVAL = 2;
-        
-        if (this.targetSearchTimer < TARGET_SEARCH_INTERVAL) {
-            return;
-        }
-
-        const enemySquads = this.squads.filter(
-            squad => squad.faction === FACTION.ENEMY
-        );
-
-        enemySquads.forEach((enemySquad) => {
-            const targetSquad = this.getNearestPlayerSquad({
-                pos: enemySquad.pos
-            });
-
-            if (!targetSquad) {
-                return;
-            }
-
-            enemySquad.setTargetPos(targetSquad.pos);
-        });
-
-        this.targetSearchTimer = 0;
-    }
-
-    getAttackableEnemySquads({ squad }) {
-        return this.squads.filter((targetSquad) => {
-            if (targetSquad.faction === squad.faction) {
-                return false;
-            }
-
-            const dx = targetSquad.pos.x - squad.pos.x;
-            const dy = targetSquad.pos.y - squad.pos.y;
-
-            const distance = Math.sqrt(dx ** 2 + dy ** 2);
-
-            return (distance <= squad.attackRange);
-        });
-    }
-
-    getRandomElement(array) {
-        if (array.length === 0) {
-            return null;
-        }
-
-        const index = Math.floor(Math.random() * array.length);
-        return array[index];
-    }
-
-    updateCombat({ dt }) {
-        this.squads.forEach((squad) => {
-            squad.attackTimer += dt;
-
-            if (squad.attackTimer < squad.attackCooldownTime) {
-                return;
-            }
-
-            const targetSquads = this.getAttackableEnemySquads({
-                squad: squad
-            });
-
-            const targetSquad = this.getRandomElement(targetSquads);
-
-            if (!targetSquad) {
-                return;
-            }
-
-            const damages = squad.getAttackDamages();
-
-            this.attacks.push(
-                new Attack({
-                    attackerSquadId: squad.squadId,
-                    targetSquadId: targetSquad.squadId,
-                    pos: {
-                        x: squad.pos.x,
-                        y: squad.pos.y
-                    },
-                    damages: damages
-                })
-            );
-
-            squad.attackTimer = 0;
-        });
-    }
-
-    update({ dt }) {
-        this.time += dt;
-        this.enemySpawnTimer += dt;
-        this.targetSearchTimer += dt;
-
-        this.squads.forEach((squad) => {
-            squad.update({ dt: dt });
-        });
-
-        this.updateCombat({ dt: dt });
-
-        this.attacks.forEach((attack) => {
-            const targetSquad = this.squads.find(
-                squad => squad.squadId === attack.targetSquadId
-            );
-
-            if (!targetSquad) {
-                attack.finished = true;
-                return;
-            }
-
-            attack.update({
-                dt: dt,
-                targetPos: {
-                    x: targetSquad.pos.x,
-                    y: targetSquad.pos.y
-                }
-            });
-
-            if (attack.finished) {
-                targetSquad.takeDamages(attack.damages);
-                if (targetSquad.isDead()) {
-                    this.removeSquad({
-                        squadId: targetSquad.squadId
-                    });
-                }
-            }
-        });
-
-        this.attacks = this.attacks.filter(
-            attack => !attack.finished
-        );
-
-        this.spawnEnemy();
-        this.updateEnemyTargets();
-    }
-
-    getState() {
-        return {
-            time: this.time,
-            battleMap: this.battleMap, 
-            squads: this.squads,
-            attacks: this.attacks, 
-            effects: this.effects
-        };
     }
 }
 
