@@ -214,6 +214,25 @@ function draw() {
         );
     });
 
+    const mySquad = squads.find(
+        squad => squad.playerId === playerId
+    );
+
+    if (mySquad && mySquad.targetPos) {
+        const targetPosV = convertPosWToV(mySquad.targetPos);
+
+        ctx.fillStyle = 'red';
+        ctx.beginPath();
+        ctx.arc(
+            targetPosV.x,
+            targetPosV.y,
+            3,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+    }
+
     attacks.forEach((attack) => {
         const posV = convertPosWToV(attack.pos);
 
