@@ -1,8 +1,8 @@
 
 let FACTION;
-let UNIT;
+let UNIT_TYPE;
 let UNIT_DATA;
-let TERRAIN;
+let TERRAIN_TYPE;
 let TERRAIN_DATA;
 
 
@@ -45,9 +45,9 @@ ws.onmessage = (event) => {
         case 'init':
             playerId = data.playerId;
             FACTION = data.faction;
-            UNIT = data.unit;
+            UNIT_TYPE = data.unitType;
             UNIT_DATA = data.unitData;
-            TERRAIN = data.terrain;
+            TERRAIN_TYPE = data.terrainType;
             TERRAIN_DATA = data.terrainData;
             break;
         case 'snapshot':

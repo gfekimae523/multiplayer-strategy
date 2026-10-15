@@ -1,5 +1,5 @@
 
-const { UNIT } = require('../constants.js');
+const { TILE_SIZE } = require('../constants.js');
 const Unit = require('./unit.js');
 
 
@@ -15,7 +15,6 @@ class Squad {
     attackRange;
 
     units;
-    unitList;
 
     speed;
 
@@ -31,13 +30,12 @@ class Squad {
         this.attackRange = 100;
 
         this.units = [];
-        unitList.forEach(({ type, count }) => {
+        Object.entries(unitList).forEach(([type, count]) => {
             for (let i = 0; i < count; i++) {
                 let unit = new Unit({ type });
                 this.units.push(unit);
             }
         });
-        this.updateUnitList();
 
         let minSpeed = (this.units.length > 0) ? Infinity : 0;
         for (let i = 0; i < this.units.length; i++) {
@@ -75,14 +73,17 @@ class Squad {
         this.pos.y += dy / distance * moveDistance;
     }
 
-    updateUnitList() {
-        this.unitList = {};
+    getUnitList() {
+        unitList = {};
+
         this.units.forEach((unit) => {
-            if (this.unitList[unit.type] === undefined) {
-                this.unitList[unit.type] = 0;
+            if (unitList[unit.type] === undefined) {
+                unitList[unit.type] = 0;
             }
-            this.unitList[unit.type]++;
+            unitList[unit.type]++;
         });
+
+        return unitList;
     }
 
     getAttackDamages() {
@@ -145,11 +146,17 @@ class Squad {
         });
 
         this.units = this.units.filter(unit => !unit.isDead());
-        this.updateUnitList();
     }
 
     isDead() {
         return this.units.length === 0;
+    }
+
+    getTilePos() {
+        return {
+            x: Math.floor(this.pos.x / TILE_SIZE), 
+            y: Math.floor(this.pos.y / TILE_SIZE)
+        }
     }
 }
 

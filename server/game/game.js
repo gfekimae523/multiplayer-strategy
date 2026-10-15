@@ -7,7 +7,7 @@ const MoveSystem = require('./systems/move-system.js');
 const VisionSystem = require('./systems/vision-system.js');
 const CombatSystem = require('./systems/combat-system.js');
 
-const { FACTION, UNIT } = require('./constants.js');
+const { FACTION, UNIT_TYPE } = require('./constants.js');
 
 
 class Game {
@@ -25,11 +25,11 @@ class Game {
     combatSystem;
 
     constructor() {
-        this.battleMap = new BattleMap();
-
         this.moveSystem = new MoveSystem();
         this.visionSystem = new VisionSystem();
         this.combatSystem = new CombatSystem();
+
+        this.battleMap = new BattleMap();
 
         this.time = 0;
         this.enemySpawnTimer = 0;
@@ -57,15 +57,15 @@ class Game {
     }
 
     addPlayer({ playerId }) {
-        const defaultUnitList = [
-            { type: UNIT.GOBLIN, count: 8 }
-        ];
+        const unitList = {
+            [UNIT_TYPE.GOBLIN]: 8
+        };
         this.addSquad({
             playerId: playerId,
             squadId: this.squadCounter,
             faction: FACTION.PLAYER,
             spawnPos: this.battleMap.spawnPos,
-            unitList: defaultUnitList
+            unitList: unitList
         });
         this.squadCounter++;
     }
@@ -76,9 +76,9 @@ class Game {
             y: 0
         };
 
-        const unitList = [
-            { type: UNIT.GOBLIN, count: 2 }
-        ];
+        const unitList = {
+            [UNIT_TYPE.GOBLIN]: 2
+        };
 
         this.addSquad({
             playerId: null,
@@ -89,10 +89,6 @@ class Game {
         });
         this.squadCounter++;
     }
-
-
-
-
 
     update({ dt }) {
         this.time += dt;

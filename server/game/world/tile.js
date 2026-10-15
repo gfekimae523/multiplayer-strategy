@@ -1,30 +1,32 @@
 
-const { FACTION, TILE_DATA } = require('../constants.js');
+const { FACTION } = require('../constants.js');
 
 class Tile {
     type;
-    x;
-    y;
+    tilePos;
     centerPos;
 
+    visionValue;
     visibility;
 
-    constructor({ type, x, y, centerPos }) {
+    constructor({ type, tilePos, centerPos }) {
         this.type = type;
-        this.x = x;
-        this.y = y;
+        this.tilePos = {
+            x: tilePos.x,
+            y: tilePos.y
+        }
         this.centerPos = {
-            x: centerPos.x, 
+            x: centerPos.x,
             y: centerPos.y
         };
-        this.visibility = {
-            [FACTION.PLAYER]: 0, 
+        this.visionValue = {
+            [FACTION.PLAYER]: 0,
             [FACTION.ENEMY]: 0
         };
-    }
-
-    get data() {
-        return TILE_DATA[this.type];
+        this.visibility = {
+            [FACTION.PLAYER]: 0,
+            [FACTION.ENEMY]: 0
+        };
     }
 }
 

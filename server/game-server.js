@@ -5,7 +5,7 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 
 const Game = require('./game/game.js');
-const { FACTION, UNIT, UNIT_DATA, TERRAIN, TERRAIN_DATA } = require('./game/constants.js');
+const { FACTION, UNIT_TYPE, UNIT_DATA, TERRAIN_TYPE, TERRAIN_DATA } = require('./game/constants.js');
 
 const PORT = process.env.PORT || 8080;
 
@@ -103,9 +103,9 @@ class GameServer {
             type: 'init',
             playerId: ws.playerId, 
             faction: FACTION,
-            unit: UNIT,
+            unitType: UNIT_TYPE,
             unitData: UNIT_DATA,
-            terrain: TERRAIN,
+            terrainType: TERRAIN_TYPE,
             terrainData: TERRAIN_DATA
         }));
     }

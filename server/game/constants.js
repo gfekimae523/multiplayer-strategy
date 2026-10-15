@@ -1,9 +1,12 @@
+
+const TILE_SIZE = 10;
+
 const FACTION = {
     PLAYER: "player",
     ENEMY: "enemy"
 };
 
-const UNIT = {
+const UNIT_TYPE = {
     GOBLIN: "goblin",
     HORSE: "horse"
 };
@@ -18,7 +21,9 @@ const UNIT_DATA = {
         magicDefense: 10,
         accuracy: 100,
         evasion: 50,
-        speed: 10
+        speed: 10, 
+        visionRange: 50, 
+        fullvisionRange: 10
     },
 
     [UNIT.HORSE]: {
@@ -30,11 +35,13 @@ const UNIT_DATA = {
         magicDefense: 12,
         accuracy: 100,
         evasion: 60,
-        speed: 20
+        speed: 20, 
+        visionRange: 60, 
+        fullvisionRange: 12
     }
 };
 
-const TERRAIN = {
+const TERRAIN_TYPE = {
     PLAIN: 'plain',
     FOREST: 'forest',
     MOUNTAIN: 'mountain',
@@ -66,9 +73,10 @@ const TERRAIN_DATA = {
 
 
 module.exports = {
+    TILE_SIZE, 
     FACTION,
-    UNIT,
+    UNIT_TYPE,
     UNIT_DATA,
-    TERRAIN,
+    TERRAIN_TYPE,
     TERRAIN_DATA
 };
