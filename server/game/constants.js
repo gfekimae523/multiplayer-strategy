@@ -12,7 +12,7 @@ const UNIT_TYPE = {
 };
 
 const UNIT_DATA = {
-    [UNIT.GOBLIN]: {
+    [UNIT_TYPE.GOBLIN]: {
         name: "ゴブリン",
         maxHp: 30,
         physicalAttack: 10,
@@ -26,7 +26,7 @@ const UNIT_DATA = {
         fullvisionRange: 10
     },
 
-    [UNIT.HORSE]: {
+    [UNIT_TYPE.HORSE]: {
         name: "ウマ",
         maxHp: 50,
         physicalAttack: 15,
@@ -49,22 +49,22 @@ const TERRAIN_TYPE = {
 };
 
 const TERRAIN_DATA = {
-    [TERRAIN.PLAIN]: {
+    [TERRAIN_TYPE.PLAIN]: {
         name: '平地',
         moveCost: 1,
         visionModifier: 1
     },
-    [TERRAIN.FOREST]: {
+    [TERRAIN_TYPE.FOREST]: {
         name: '森林',
         moveCost: 2,
         visionModifier: 0.5
     },
-    [TERRAIN.MOUNTAIN]: {
+    [TERRAIN_TYPE.MOUNTAIN]: {
         name: '山岳',
         moveCost: 4,
         visionModifier: 0.9
     },
-    [TERRAIN.WATER]: {
+    [TERRAIN_TYPE.WATER]: {
         name: '海面', 
         moveCost: 10, 
         visionModifier: 1.0
