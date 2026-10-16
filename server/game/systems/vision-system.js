@@ -44,8 +44,8 @@ class VisionSystem {
                     visionValue = 1 * (1 - (distance - fullVisionRange) / (visionRange - fullVisionRange));
                 }
                 visionPattern.push({
-                    dx: dx, 
-                    dy: dy, 
+                    dx: dx,
+                    dy: dy,
                     visionValue: visionValue
                 });
             }
@@ -72,8 +72,39 @@ class VisionSystem {
 
     #updateVisionValue({ battleMap, squad }) {
         const squadTilePos = squad.getTilePos();
-        //const tile = battleMap.tiles[tilePos.y][tilePos.x];
-        //tile.visionValue[squad.faction] += 1;
+        const unitList = squad.getUnitList();
+
+        Object.entries(unitList).forEach(([type, count]) => {
+            if (count <= 0) return;
+
+            const visionPattern = this.visionPatterns[type];
+
+            visionPattern.forEach((vision) => {
+                const x = squadTilePos.x + vision.dx;
+                const y = squadTilePos.y + vision.dy;
+
+                if (
+                    y < 0 ||
+                    y >= battleMap.tiles.length ||
+                    x < 0 ||
+                    x >= battleMap.tiles[y].length
+                ) {
+                    return;
+                }
+
+                const tile = battleMap.tiles[y][x];
+                const faction = squad.faction;
+                const value = vision.visionValue * count;
+
+                if (!Number.isFinite(tile.visionValue[faction])) return;
+
+                if (!Number.isFinite(value)) {
+                    tile.visionValue[faction] = Infinity;
+                } else {
+                    tile.visionValue[faction] += value;
+                }
+            });
+        });
     }
 
     #normalizeVisionValue({ battleMap }) {
@@ -81,17 +112,15 @@ class VisionSystem {
 
         battleMap.tiles.forEach((tileRow) => {
             tileRow.forEach((tile) => {
-                if (Number.isFinite(tile.visionValue[FACTION.PLAYER])) {
-                    tile.visibility[FACTION.PLAYER] = 1 - Math.exp(-k * tile.visionValue[FACTION.PLAYER]);
-                } else {
-                    tile.visibility[FACTION.PLAYER] = 1;
-                }
-                
-                if (Number.isFinite(tile.visionValue[FACTION.ENEMY])) {
-                    tile.visibility[FACTION.ENEMY] = 1 - Math.exp(-k * tile.visionValue[FACTION.ENEMY]);
-                } else {
-                    tile.visibility[FACTION.ENEMY] = 1;
-                }
+                Object.values(FACTION).forEach((faction) => {
+                    const visionValue = tile.visionValue[faction];
+
+                    if (Number.isFinite(visionValue)) {
+                        tile.visibility[faction] = 1 - Math.exp(-k * visionValue);
+                    } else {
+                        tile.visibility[faction] = 1;
+                    }
+                });
             });
         });
     }
