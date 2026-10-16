@@ -189,12 +189,11 @@ function drawEnemySquadStatus() {
 function draw() {
     ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
 
-    ctx.fillStyle = 'rgb(210, 255, 150)';
-    ctx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
-
     if (!gameState) {
         return;
     }
+
+    drawBattleMap();
 
     squads.forEach((squad) => {
         const posV = convertPosWToV(squad.pos);
@@ -242,8 +241,31 @@ function draw() {
         ctx.fill();
     });
 
-    drawMySquadStatus();
     drawEnemySquadStatus();
+    drawMySquadStatus();
+    
+}
+
+function drawBattleMap() {
+    if (!battleMap || !TERRAIN_DATA) return;
+
+    battleMap.tiles.forEach((tileRow) => {
+        tileRow.forEach((tile) => {
+            const terrainData = TERRAIN_DATA[tile.type];
+            if (!terrainData) return;
+
+            const posV = convertPosWToV(tile.centerPos);
+            const tileSizeV = battleMap.tileSize * camera.zoom;
+
+            ctx.fillStyle = terrainData.color;
+            ctx.fillRect(
+                posV.x - tileSizeV / 2,
+                posV.y - tileSizeV / 2,
+                tileSizeV,
+                tileSizeV
+            );
+        });
+    });
 }
 
 function bindEvents() {

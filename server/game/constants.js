@@ -52,22 +52,26 @@ const TERRAIN_DATA = {
     [TERRAIN_TYPE.PLAIN]: {
         name: '平地',
         moveCost: 1,
-        visionModifier: 1
+        visionModifier: 1, 
+        color: '#bbffbb'
     },
     [TERRAIN_TYPE.FOREST]: {
         name: '森林',
         moveCost: 2,
-        visionModifier: 0.5
+        visionModifier: 0.5, 
+        color: '#44aa44'
     },
     [TERRAIN_TYPE.MOUNTAIN]: {
         name: '山岳',
         moveCost: 4,
-        visionModifier: 0.9
+        visionModifier: 0.9, 
+        color: '#bb8844'
     },
     [TERRAIN_TYPE.WATER]: {
         name: '海面', 
         moveCost: 10, 
-        visionModifier: 1.0
+        visionModifier: 1.0, 
+        color: '#4466ee'
     }
 };
 
