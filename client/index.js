@@ -249,6 +249,9 @@ function draw() {
 function drawBattleMap() {
     if (!battleMap || !TERRAIN_DATA) return;
 
+    console.log('tile:', battleMap.tiles[0][0]);
+    console.log('TERRAIN_DATA:', TERRAIN_DATA);
+
     battleMap.tiles.forEach((tileRow) => {
         tileRow.forEach((tile) => {
             const terrainData = TERRAIN_DATA[tile.type];
