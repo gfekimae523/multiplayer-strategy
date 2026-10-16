@@ -33,7 +33,9 @@ class BattleMap {
             for (let x = 0; x < this.columns; x++) {
                 row.push(
                     new Tile({
-                        type: TERRAIN_TYPE.PLAIN, 
+                        type: (x >= 2 && x < this.columns - 2 && y >= 2 && y < this.rows - 2) 
+                            ? TERRAIN_TYPE.PLAIN 
+                            : TERRAIN_TYPE.FOREST, 
                         tilePos: {
                             x: x, 
                             y: y

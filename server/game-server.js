@@ -5,7 +5,7 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 
 const Game = require('./game/game.js');
-const { FACTION, UNIT_TYPE, UNIT_DATA, TERRAIN_TYPE, TERRAIN_DATA } = require('./game/constants.js');
+const { TILE_SIZE, FACTION, UNIT_TYPE, UNIT_DATA, TERRAIN_TYPE, TERRAIN_DATA } = require('./game/constants.js');
 
 const PORT = process.env.PORT || 8080;
 
@@ -102,6 +102,8 @@ class GameServer {
         ws.send(JSON.stringify({
             type: 'init',
             playerId: ws.playerId, 
+
+            tileSize: TILE_SIZE, 
             faction: FACTION,
             unitType: UNIT_TYPE,
             unitData: UNIT_DATA,
