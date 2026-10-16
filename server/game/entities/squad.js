@@ -74,7 +74,7 @@ class Squad {
     }
 
     getUnitList() {
-        unitList = {};
+        const unitList = {};
 
         this.units.forEach((unit) => {
             if (unitList[unit.type] === undefined) {
