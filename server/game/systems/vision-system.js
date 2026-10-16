@@ -6,7 +6,7 @@ class VisionSystem {
 
     constructor() {
         this.visionPatterns = {};
-        UNIT_TYPE.forEach((type) => {
+        Object.values(UNIT_TYPE).forEach((type) => {
             this.#createVisionPattern({ type: type });
         });
     }
