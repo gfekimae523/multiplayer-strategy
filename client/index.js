@@ -249,27 +249,49 @@ function draw() {
 function drawBattleMap() {
     if (!battleMap || !TERRAIN_DATA) return;
 
-    console.log('tile:', battleMap.tiles[0][0]);
-    console.log('TERRAIN_DATA:', TERRAIN_DATA);
+    console.log('tileSize:', battleMap.tileSize);
 
     battleMap.tiles.forEach((tileRow) => {
         tileRow.forEach((tile) => {
             const terrainData = TERRAIN_DATA[tile.type];
             if (!terrainData) return;
 
-            const posV = convertPosWToV(tile.centerPos);
-            const tileSizeV = battleMap.tileSize * camera.zoom;
-
             ctx.fillStyle = terrainData.color;
+
             ctx.fillRect(
-                posV.x - tileSizeV / 2,
-                posV.y - tileSizeV / 2,
-                tileSizeV,
-                tileSizeV
+                tile.tilePos.x * 10,
+                tile.tilePos.y * 10,
+                10,
+                10
             );
         });
     });
 }
+
+// function drawBattleMap() {
+//     if (!battleMap || !TERRAIN_DATA) return;
+
+//     console.log('tile:', battleMap.tiles[0][0]);
+//     console.log('TERRAIN_DATA:', TERRAIN_DATA);
+
+//     battleMap.tiles.forEach((tileRow) => {
+//         tileRow.forEach((tile) => {
+//             const terrainData = TERRAIN_DATA[tile.type];
+//             if (!terrainData) return;
+
+//             const posV = convertPosWToV(tile.centerPos);
+//             const tileSizeV = battleMap.tileSize * camera.zoom;
+
+//             ctx.fillStyle = terrainData.color;
+//             ctx.fillRect(
+//                 posV.x - tileSizeV / 2,
+//                 posV.y - tileSizeV / 2,
+//                 tileSizeV,
+//                 tileSizeV
+//             );
+//         });
+//     });
+// }
 
 function bindEvents() {
     mainCanvas.addEventListener('click', (event) => {
